@@ -1,0 +1,35 @@
+#%RAML 1.0
+title: payment-xpapi-raml
+description: This API will record transaction details in company database.
+version: 1.0.0
+baseUri: http://localhost:8081/payments/paymentTransactions
+
+uses:
+  common-library: exchange_modules/36871de0-a490-4cd1-84fd-2f06a26607e6/common-fragment/1.0.8/common-fragment.raml
+
+securitySchemes:
+  OAuth2: !include /exchange_modules/36871de0-a490-4cd1-84fd-2f06a26607e6/okta-oauth-security-scheme/1.0.0/okta-oauth-security-scheme.raml
+    
+
+/payments:
+  /paymentTransactions:
+    post:
+      is: [common-library.authorization-header, common-library.common-header, common-library.data-header, common-library.common-error]
+      securedBy: [OAuth2]       
+      body:
+        application/json:
+          type: object
+          properties:
+            recordPaymentTransactionRequest:
+              type: common-library.request-recordPayment
+      responses:
+        200:
+          body:
+            application/json:
+              type: object
+              properties:
+                recordPaymentTransactionResponse:
+                  type: common-library.response-recordPayment
+        
+      
+

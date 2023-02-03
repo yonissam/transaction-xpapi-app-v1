@@ -1,0 +1,8 @@
+http:
+  port: "8083"
+  
+transaction:
+  papi:
+    host: "66.228.35.64"
+    port: "8082"
+    endpoint_recordPayment: "/api/payments/paymentTransactions"
