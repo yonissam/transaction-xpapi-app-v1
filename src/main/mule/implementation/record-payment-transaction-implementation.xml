@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="record-payment-transaction-implementationFlow" doc:id="4d5ffe6c-824a-4875-8dd1-09c42a2696ea" >
+		<logger level="INFO" doc:name="Payment Transactions Flow Start Logger" doc:id="159fca54-feaf-448d-9138-4af0c11e8bec" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStam: (now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;},&#10;    TransactionId: vars.transactionId,&#10;    AppName: app.name,&#10;    FlowName: flow.name, &#10;    BusinessProcessName: &quot;Transaction Process&quot;,&#10;    Category: &quot;Payment&quot;,&#10;    OriginatingApplication: &quot;Process API&quot;,&#10;    DestinationApplication: &quot;Transaction System API&quot;,&#10;    PloicyNumber: vars.requestData.body.recordPaymentTransactionRequest.transactionDetails.policyNumber,&#10;    TxnState: &quot;START&quot;&#10;}]" />
+		<logger level="INFO" doc:name="Checkout Call Start Logger" doc:id="cac072eb-e357-485c-9fd4-652fed7437ac" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStam: (now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;},&#10;    TransactionId: vars.transactionId,&#10;    AppName: app.name,&#10;    FlowName: flow.name, &#10;    BusinessProcessName: &quot;Transaction Process&quot;,&#10;    Category: &quot;Payment&quot;,&#10;    OriginatingApplication: &quot;Experience UI&quot;,&#10;    DestinationApplication: &quot;Process API&quot;,&#10;    PloicyNumber: vars.requestData.body.recordPaymentTransactionRequest.transactionDetails.policyNumber,&#10;    TxnState: &quot;Request to Process API&quot;&#10;&#10;}]" />
+		<http:request method="POST" doc:name="Payment Transactions Process API Request" doc:id="af828489-929f-4917-84b4-c5fa207b28b7" config-ref="HTTP_Request_configuration_Transaction_xpapi" path="${transaction.papi.endpoint_recordPayment}" responseTimeout="100000">
+			<http:body><![CDATA[#[output application/json
+---
+vars.requestData.body]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Accept" : "application/json",
+	"x-alpbnk-msgid" : "hdsfhjdhjxbv859sjdf76433746bbd123456",
+	"Accept-Language" : "en-US",
+	"Content-Type" : "application/json",
+	"x-alpbnk-clientSecret" : "dsgfhaegur457r6ewsewegrfjesh",
+	"x-alpbnk-clientId" : "hsdfgysdhfcdshf37er6twgsdhfjcd"
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Checkout Call End Logger" doc:id="1490ee2b-1f83-4963-91cf-69245a649f1c" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStam: (now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;},&#10;    TransactionId: vars.transactionId,&#10;    AppName: app.name,&#10;    FlowName: flow.name, &#10;    BusinessProcessName: &quot;Transaction Process&quot;,&#10;    Category: &quot;Payment&quot;,&#10;    OriginatingApplication: &quot;Experience UI&quot;,&#10;    DestinationApplication: &quot;Process API&quot;,&#10;    PloicyNumber: vars.requestData.body.recordPaymentTransactionRequest.transactionDetails.policyNumber,&#10;    TxnState: &quot;Response from Process API&quot;,&#10;    ProcessTime: ((now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;}) -vars.startTime&#10;&#10;}]" />
+		<ee:transform doc:name="Transform Message" doc:id="0e84e79b-a2d4-4133-a71f-fea1fb90e1e5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Payment Transactions Flow End Logger" doc:id="461dda26-e9c9-4ac4-94eb-f29e4c381da1" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStam: (now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;},&#10;    TransactionId: vars.transactionId,&#10;    AppName: app.name,&#10;    FlowName: flow.name, &#10;    BusinessProcessName: &quot;Transaction Process&quot;,&#10;    Category: &quot;Payment&quot;,&#10;    OriginatingApplication: &quot;Process API&quot;,&#10;    DestinationApplication: &quot;Transaction System API&quot;,&#10;    PloicyNumber: vars.requestData.body.recordPaymentTransactionRequest.transactionDetails.policyNumber,&#10;    TxnState: &quot;END&quot;,&#10;    ProcessTime: ((now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;}) -vars.startTime&#10;&#10;}]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6fa215d0-956b-4c28-91bf-31b5f15c69da" type="HTTP:BAD_REQUEST, HTTP:CONNECTIVITY, HTTP:NOT_FOUND, HTTP:RETRY_EXHAUSTED">
+				<logger level="INFO" doc:name="Logger" doc:id="e2560ed0-81ee-4172-81c2-3ed012ae3275" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStam: (now() &gt;&gt; &quot;EST&quot;) as String {format: &quot;yyyy-MM-dd'T'hh:mm:ss&quot;},&#10;    TransactionId: vars.transactionId,&#10;    AppName: app.name,&#10;    FlowName: flow.name, &#10;    BusinessProcessName: &quot;Transaction Process&quot;,&#10;    Category: &quot;Payment&quot;,&#10;    OriginatingApplication: &quot;Experience UI&quot;,&#10;    DestinationApplication: &quot;Process API&quot;,&#10;    PloicyNumber: vars.requestData.body.recordPaymentTransactionRequest.transactionDetails.policyNumber,&#10;    TxnState: &quot;Error&quot;&#10;&#10;}]" />
+				<ee:transform doc:name="Transform Message" doc:id="d1d6efca-1544-459b-93c4-9eb590e6804d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   "msg":"failed operation",
+   "code":500,
+   "eventId": vars.transactionId,
+   "error":{
+      "type":"HTTP Request Error",
+      "title":error.errorType[0],
+      "details":error.description
+   }
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
