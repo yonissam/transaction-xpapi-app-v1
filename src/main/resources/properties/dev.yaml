@@ -3,6 +3,6 @@ http:
   
 transaction:
   papi:
-    host: "66.228.35.64"
+    host: "52.146.0.204"
     port: "8082"
     endpoint_recordPayment: "/api/payments/paymentTransactions"
